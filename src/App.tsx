@@ -8,14 +8,12 @@ import {
   X
 } from 'lucide-react';
 
-// Define types for our navigation items
 interface NavigationItem {
   name: string;
   icon: React.FC<{ className?: string; size?: number }>;
   id: 'portfolio' | 'finance' | 'green' | 'utilities';
 }
 
-// Define type for active section
 type ActiveSection = NavigationItem['id'];
 
 const PortfolioPWA: React.FC = () => {
@@ -29,10 +27,18 @@ const PortfolioPWA: React.FC = () => {
     { name: 'Utilities', icon: () => <Settings className="mr-3 h-5 w-5" />, id: 'utilities' }
   ];
 
-  // Component for section content to avoid repetition
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleSectionChange = (sectionId: ActiveSection) => {
+    setActiveSection(sectionId);
+    setIsMenuOpen(false);
+  };
+
   const SectionContent: React.FC<{ title: string; description: string }> = ({ title, description }) => (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h1 className="text-2xl font-bold mb-4">{title}</h1>
+    <div className="bg-white rounded-lg shadow-lg p-6">
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">{title}</h1>
       <p className="text-gray-600">{description}</p>
     </div>
   );
@@ -40,17 +46,18 @@ const PortfolioPWA: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Top Navigation Bar */}
-      <nav className="bg-white shadow-lg">
+      <nav className="bg-white shadow-lg fixed top-0 left-0 right-0 z-30">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 focus:outline-none"
+                onClick={handleMenuToggle}
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                aria-label="Toggle menu"
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-              <span className="ml-4 text-xl font-semibold">My Portfolio & Tools</span>
+              <span className="ml-4 text-xl font-semibold text-gray-800">My Portfolio & Tools</span>
             </div>
           </div>
         </div>
@@ -60,18 +67,15 @@ const PortfolioPWA: React.FC = () => {
       <div 
         className={`fixed inset-y-0 left-0 transform ${
           isMenuOpen ? 'translate-x-0' : '-translate-x-full'
-        } w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out z-20`}
+        } w-64 bg-white shadow-lg transition-transform duration-300 ease-in-out z-20 mt-16`}
       >
         <div className="h-full flex flex-col">
           <div className="flex-1 py-4 overflow-y-auto">
             {navigation.map((item) => (
               <button
                 key={item.id}
-                onClick={() => {
-                  setActiveSection(item.id);
-                  setIsMenuOpen(false);
-                }}
-                className={`w-full flex items-center px-4 py-2 text-sm font-medium ${
+                onClick={() => handleSectionChange(item.id)}
+                className={`w-full flex items-center px-4 py-3 text-sm font-medium transition-colors duration-150 ${
                   activeSection === item.id
                     ? 'text-blue-600 bg-blue-50'
                     : 'text-gray-600 hover:bg-gray-50'
@@ -85,8 +89,16 @@ const PortfolioPWA: React.FC = () => {
         </div>
       </div>
 
+      {/* Overlay for mobile */}
+      {isMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-10"
+          onClick={() => setIsMenuOpen(false)}
+        />
+      )}
+
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-6 mt-16">
         {activeSection === 'portfolio' && (
           <SectionContent 
             title="Welcome to My Portfolio"
